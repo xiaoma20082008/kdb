@@ -2,13 +2,13 @@
 // File: kdb_server.go
 // Project: server
 // File Created: 2023-09-08
-// Author: machunxiao (machunxiao@shizhuang-inc.com)
+// Author: xiaoma20082008 (mmccxx2519@gmail.com)
 // -----
-// Last Modified By:  machunxiao (machunxiao@shizhuang-inc.com)
+// Last Modified By:  xiaoma20082008 (mmccxx2519@gmail.com)
 // Last Modified Time: 2023-09-08 10:34:42
 // -----
 //
-// Copyright (C) 2023, Shanghai Poizon Information Technology Co., Ltd.
+// Copyright (C) xiaoma20082008. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

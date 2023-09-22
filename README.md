@@ -1,14 +1,15 @@
 <!--
  * File: README.md
  * Project: kdb
- * File Created: 2023-09-07
- * Author: machunxiao (machunxiao@shizhuang-inc.com)
- * -----
- * Last Modified By:  machunxiao (machunxiao@shizhuang-inc.com)
- * Last Modified Time: 2023-09-07 18:20:38
- * -----
+ * File Created: 2023-09-22
+ * Author: xiaoma20082008 (mmccxx2519@gmail.com)
  * 
- * Copyright (C) 2023, Shanghai Poizon Information Technology Co., Ltd.
+ * ------------------------------------------------------------------------
+ * Last Modified At: 2023-09-22 20:44:40
+ * Last Modified By: xiaoma20082008 (mmccxx2519@gmail.com>)
+ * ------------------------------------------------------------------------
+ * 
+ * Copyright (C) xiaoma20082008. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
