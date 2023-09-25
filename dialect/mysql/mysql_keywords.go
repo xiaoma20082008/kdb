@@ -1,7 +1,12 @@
 package mysql
 
+import (
+	"kdb/dialect"
+	"strings"
+)
+
 const (
-	key_start int = iota
+	key_start dialect.TokenKind = iota
 
 	ACCESSIBLE
 	ACCOUNT
@@ -787,6 +792,7 @@ const (
 
 	op_start
 
+	QM    // ?
 	COLON // :
 	EM    // !
 	STAR  // *
@@ -802,11 +808,15 @@ const (
 	NE    // !=, <>
 	EQ    // =
 	NSE   // <=>
+	LP    // (
+	RP    // )
+	LB    // [
+	RB    // ]
 
 	op_end
 )
 
-var tokens = map[int]string{
+var tokens = map[dialect.TokenKind]string{
 	ACCESSIBLE:      "ACCESSIBLE",
 	ACCOUNT:         "ACCOUNT",
 	ACTION:          "ACTION",
@@ -1587,6 +1597,7 @@ var tokens = map[int]string{
 	ZEROFILL: "ZEROFILL",
 	ZONE:     "ZONE",
 
+	QM:    "?",
 	LT:    "<",
 	LS:    "<<",
 	LE:    "<=",
@@ -1600,4 +1611,26 @@ var tokens = map[int]string{
 	MINUS: "-",
 	SLASH: "/",
 	STAR:  "*",
+	LP:    "(",
+	RP:    ")",
+	LB:    "[",
+	RB:    "]",
+}
+
+func isKeyword(kw string) (dialect.TokenKind, bool) {
+	for k, v := range tokens {
+		if strings.EqualFold(v, kw) {
+			return k, true
+		}
+	}
+	return -1, false
+}
+
+func isSymbol2(sym string) (dialect.TokenKind, bool) {
+	for k, v := range tokens {
+		if strings.EqualFold(v, sym) {
+			return k, true
+		}
+	}
+	return -1, false
 }

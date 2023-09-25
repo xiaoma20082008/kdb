@@ -29,7 +29,10 @@ import "fmt"
 
 type SqlNode interface {
 	fmt.Stringer
-	Position() Position
+
+	Line() int
+	Offset() int
+	Column() int
 }
 
 type SqlStmt interface {
@@ -40,39 +43,51 @@ type SqlExpr interface {
 	SqlNode
 }
 
+type SqlExprList []SqlExpr
+
 // SqlStmt
 type (
+
+	// select * from t1,t2 where xx = ? group by xx having xx = xx order by xx limit
 	SqlSelect struct {
 		SqlStmt
+
+		Columns SqlExprList
+		From    SqlExprList
+		Where   SqlExpr
+		GroupBy SqlExprList
+		Having  SqlExpr
+		OrderBy SqlExprList
+		Limit   SqlExpr
 	}
 
 	SqlInsert struct {
 		SqlStmt
 
-		table   *SqlIdentifier
-		columns []SqlExpr
-		values  []SqlExpr
+		Table   *SqlIdentifier
+		Columns SqlExprList
+		Values  SqlExprList
 	}
 
 	SqlDelete struct {
 		SqlStmt
 
-		table *SqlIdentifier
-		where SqlExpr
+		Table *SqlIdentifier
+		Where SqlExpr
 
-		orderBy SqlExpr
-		limit   SqlExpr
+		OrderBy SqlExpr
+		Limit   SqlExpr
 	}
 
 	SqlUpdate struct {
 		SqlStmt
 
-		table *SqlIdentifier
-		items []*SqlUpdateItem
-		where SqlExpr
+		Table *SqlIdentifier
+		Items SqlUpdateItems
+		Where SqlExpr
 
-		orderBy SqlExpr
-		limit   SqlExpr
+		OrderBy SqlExpr
+		Limit   SqlExpr
 	}
 )
 
@@ -88,7 +103,7 @@ type (
 		Value string
 	}
 
-	SqlLong struct {
+	SqlInteger struct {
 		SqlExpr
 		Value int64
 	}
@@ -153,3 +168,5 @@ type (
 		Comment string
 	}
 )
+
+type SqlUpdateItems []*SqlUpdateItem

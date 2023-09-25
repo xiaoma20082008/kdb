@@ -31,7 +31,7 @@ import (
 	"testing"
 )
 
-func Test_mysqlParser_parse(t *testing.T) {
+func Test_mysqlParser_parseStmt(t *testing.T) {
 	type fields struct {
 		offset int
 		stream *dialect.TokenList
@@ -42,7 +42,46 @@ func Test_mysqlParser_parse(t *testing.T) {
 		want    dialect.SqlStmt
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Insert",
+			fields: fields{
+				offset: 0,
+				stream: dialect.NewTokenList([]*dialect.Token{
+					dialect.NewToken("INSERT", dialect.Symbol, INSERT, 1, 0, 0),
+					dialect.NewToken("INTO", dialect.Symbol, INTO, 1, 0, 0),
+					dialect.NewToken("t1", dialect.Ident, -1, 1, 0, 0),
+					dialect.NewToken("(", dialect.Symbol, LP, 1, 0, 0),
+					dialect.NewToken("a", dialect.Ident, -1, 1, 0, 0),
+					dialect.NewToken("b", dialect.Ident, -1, 1, 0, 0),
+					dialect.NewToken("c", dialect.Ident, -1, 1, 0, 0),
+					dialect.NewToken("d", dialect.Ident, -1, 1, 0, 0),
+					dialect.NewToken(")", dialect.Symbol, RP, 1, 0, 0),
+					dialect.NewToken("VALUES", dialect.Symbol, VALUES, 1, 0, 0),
+					dialect.NewToken("(", dialect.Symbol, LP, 1, 0, 0),
+					dialect.NewToken("101", dialect.String, -1, 1, 0, 0),
+					dialect.NewToken("100.00", dialect.Float, -1, 1, 0, 0),
+					dialect.NewToken("200", dialect.Integer, -1, 1, 0, 0),
+					dialect.NewToken("?", dialect.Symbol, -1, 1, 0, 0),
+					dialect.NewToken(")", dialect.Symbol, RP, 1, 0, 0),
+				}),
+			},
+			want: &dialect.SqlInsert{
+				Table: &dialect.SqlIdentifier{Id: "t1"},
+				Columns: []dialect.SqlExpr{
+					&dialect.SqlIdentifier{Id: "a"},
+					&dialect.SqlIdentifier{Id: "b"},
+					&dialect.SqlIdentifier{Id: "c"},
+					&dialect.SqlIdentifier{Id: "d"},
+				},
+				Values: []dialect.SqlExpr{
+					&dialect.SqlString{Value: "a"},
+					&dialect.SqlFloat{Value: 100.00},
+					&dialect.SqlInteger{Value: 200},
+					&dialect.SqlIdentifier{Id: "?"},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -50,13 +89,13 @@ func Test_mysqlParser_parse(t *testing.T) {
 				offset: tt.fields.offset,
 				stream: tt.fields.stream,
 			}
-			got, err := parser.parse()
+			got, err := parser.parseStmt()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("mysqlParser.parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("mysqlParser.parseStmt() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("mysqlParser.parse() = %v, want %v", got, tt.want)
+				t.Errorf("mysqlParser.parseStmt() = %v, want %v", got, tt.want)
 			}
 		})
 	}

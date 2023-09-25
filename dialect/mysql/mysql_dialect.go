@@ -39,5 +39,5 @@ func mysqlTokenize(sql string) (*dialect.TokenList, error) {
 
 func mysqlParse(tokens *dialect.TokenList) (dialect.SqlStmt, error) {
 	parser := newMysqlParser(tokens)
-	return parser.parse()
+	return parser.parseStmt()
 }

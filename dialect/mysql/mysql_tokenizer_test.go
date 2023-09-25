@@ -56,18 +56,23 @@ func Test_mysqlTokenizer_tokenize(t *testing.T) {
 			name: "tokenize",
 			fields: genField(`
 			hello 123 ? + - * / '123'
+			123.456 
+			'123.456'
 			`),
 			want: &dialect.TokenList{
 				Offset: 0,
 				Tokens: []*dialect.Token{
-					dialect.NewToken("hello", dialect.Ident, 0, 0, 0),
-					dialect.NewToken("123", dialect.Integer, 0, 0, 0),
-					dialect.NewToken("?", dialect.Symbol, 0, 0, 0),
-					dialect.NewToken("+", dialect.Symbol, 0, 0, 0),
-					dialect.NewToken("-", dialect.Symbol, 0, 0, 0),
-					dialect.NewToken("*", dialect.Symbol, 0, 0, 0),
-					dialect.NewToken("/", dialect.Symbol, 0, 0, 0),
-					dialect.NewToken("123", dialect.String, 0, 0, 0),
+					dialect.NewToken("hello", dialect.Ident, -1, 2, 4, 9),
+					dialect.NewToken("123", dialect.Integer, -1, 2, 10, 13),
+					dialect.NewToken("?", dialect.Symbol, QM, 2, 14, 15),
+					dialect.NewToken("+", dialect.Symbol, PLUS, 2, 16, 17),
+					dialect.NewToken("-", dialect.Symbol, MINUS, 2, 18, 19),
+					dialect.NewToken("*", dialect.Symbol, STAR, 2, 20, 21),
+					dialect.NewToken("/", dialect.Symbol, SLASH, 2, 22, 23),
+					dialect.NewToken("123", dialect.String, -1, 2, 25, 29),
+					dialect.NewToken("123.456", dialect.Float, -1, 3, 33, 40),
+					dialect.NewToken("123.456", dialect.String, -1, 4, 46, 54),
+					dialect.NewToken("", dialect.EOF, -1, -1, -1, -1),
 				},
 			},
 			wantErr: false,

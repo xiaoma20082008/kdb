@@ -25,7 +25,8 @@
 
 package dialect
 
-type TokenType int32
+type TokenType int
+type TokenKind int
 
 const (
 	EOF TokenType = -(iota + 1)
@@ -61,47 +62,24 @@ func (tt TokenType) String() string {
 type Token struct {
 	Text string
 	Type TokenType
+	Kind TokenKind
 
-	Position Position
-}
-
-type TokenList struct {
-	Offset int
-	Tokens []*Token
+	Offset int // byte offset, starting at 0
+	Line   int // line number, starting at 1
+	Column int // column number, starting at 1 (character count per line)
 }
 
 func (t Token) String() string {
 	return t.Text
 }
 
-func (list *TokenList) Next() *Token {
-	list.Offset++
-	return list.Tokens[list.Offset]
-}
-
-func (list *TokenList) Peek() *Token {
-	return list.Tokens[list.Offset+1]
-}
-
-func (list *TokenList) Add(token *Token) {
-	list.Tokens = append(list.Tokens, token)
-}
-
-func NewToken(text string, tt TokenType, offset, line, column int) *Token {
+func NewToken(text string, tt TokenType, kind TokenKind, line, offset, column int) *Token {
 	return &Token{
-		Text: text,
-		Type: tt,
-		Position: Position{
-			Offset: offset,
-			Line:   line,
-			Column: column,
-		},
-	}
-}
-
-func NewTokenList(tokens []*Token) *TokenList {
-	return &TokenList{
-		Tokens: tokens,
-		Offset: 0,
+		Text:   text,
+		Type:   tt,
+		Kind:   kind,
+		Line:   line,
+		Offset: offset,
+		Column: column,
 	}
 }

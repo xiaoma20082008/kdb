@@ -35,7 +35,7 @@ func (identifier SqlString) String() string {
 	return fmt.Sprintf("'%s'", identifier.Value)
 }
 
-func (identifier SqlLong) String() string {
+func (identifier SqlInteger) String() string {
 	return fmt.Sprintf("%d", identifier.Value)
 }
 

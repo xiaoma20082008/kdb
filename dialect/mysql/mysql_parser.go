@@ -25,15 +25,188 @@
 
 package mysql
 
-import "kdb/dialect"
+import (
+	"fmt"
+	"kdb/dialect"
+	"strconv"
+)
 
 type mysqlParser struct {
 	offset int
 	stream *dialect.TokenList
 }
 
-func (parser *mysqlParser) parse() (dialect.SqlStmt, error) {
+func (parser *mysqlParser) parseStmt() (dialect.SqlStmt, error) {
+	token := parser.stream.Curr()
+	if token.Type == dialect.Symbol {
+		switch token.Kind {
+		case INSERT:
+			return parser.parseInsert()
+		case DELETE:
+			return parser.parseDelete()
+		case UPDATE:
+			return parser.parseUpdate()
+		case SELECT:
+			return parser.parseSelect()
+		default:
+			return nil, fmt.Errorf("unknown TokenKind: %d", token.Kind)
+		}
+
+	}
+	return nil, fmt.Errorf("expect: insert/delete/update/select, but got: %v", token)
+}
+
+func (parser *mysqlParser) parseExpr() (dialect.SqlExpr, error) {
+	token := parser.stream.Curr()
+	if token == nil {
+		return nil, nil
+	}
+	switch token.Type {
+	case dialect.Ident:
+		return &dialect.SqlIdentifier{Id: token.Text}, nil
+	case dialect.Symbol:
+		// TODO
+		return nil, nil
+	case dialect.Float:
+		v, _ := strconv.ParseFloat(token.Text, 64)
+		return &dialect.SqlFloat{Value: v}, nil
+	case dialect.Integer:
+		v, _ := strconv.ParseInt(token.Text, 10, 64)
+		return &dialect.SqlInteger{Value: v}, nil
+	case dialect.String:
+		return &dialect.SqlString{Value: token.Text}, nil
+	case dialect.Comment:
+		return &dialect.SqlComment{Comment: token.Text}, nil
+	case dialect.EOF:
+		return nil, nil
+	}
 	return nil, nil
+}
+
+func (parser *mysqlParser) parseInsert() (*dialect.SqlInsert, error) {
+	// insert into t(a,b,c) values()
+	if err := parser.consume(INSERT); err != nil {
+		return nil, err
+	}
+	if err := parser.consume(INTO); err != nil {
+		return nil, err
+	}
+	tb, err := parser.parseExpr()
+	if err != nil {
+		return nil, err
+	}
+	table := tb.(dialect.SqlIdentifier)
+	if err := parser.consume(LP); err != nil {
+		return nil, err
+	}
+	columns, err := parser.parseExprList()
+	if err != nil {
+		return nil, err
+	}
+	if err := parser.consume(RP); err != nil {
+		return nil, err
+	}
+	if err := parser.consume(VALUES); err != nil {
+		return nil, err
+	}
+	if err := parser.consume(LP); err != nil {
+		return nil, err
+	}
+	values, err := parser.parseExprList()
+	if err != nil {
+		return nil, err
+	}
+	if err := parser.consume(RP); err != nil {
+		return nil, err
+	}
+	return &dialect.SqlInsert{
+		Table:   &table,
+		Columns: columns,
+		Values:  values,
+	}, nil
+}
+
+func (parser *mysqlParser) parseDelete() (*dialect.SqlDelete, error) {
+	// delete from t1 where xxx
+	if err := parser.consume(DELETE); err != nil {
+		return nil, err
+	}
+	if err := parser.consume(FROM); err != nil {
+		return nil, err
+	}
+	tb, err := parser.parseExpr()
+	if err != nil {
+		return nil, err
+	}
+	table := tb.(dialect.SqlIdentifier)
+	var where dialect.SqlExpr
+	if parser.stream.Peek().Kind == WHERE {
+		parser.consume(WHERE)
+		where, err = parser.parseExpr()
+		if err != nil {
+			return nil, err
+		}
+	}
+	var orderBy dialect.SqlExpr
+	if parser.stream.Peek().Kind == ORDER {
+		parser.consume(ORDER)
+		parser.consume(BY)
+		orderBy, err = parser.parseExpr()
+		if err != nil {
+			return nil, err
+		}
+	}
+	var limit dialect.SqlExpr
+	if parser.stream.Peek().Kind == LIMIT {
+		parser.consume(LIMIT)
+		limit, err = parser.parseExpr()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &dialect.SqlDelete{
+		Table:   &table,
+		Where:   where,
+		OrderBy: orderBy,
+		Limit:   limit,
+	}, nil
+}
+
+func (parser *mysqlParser) parseUpdate() (*dialect.SqlUpdate, error) {
+	if err := parser.consume(UPDATE); err != nil {
+		return nil, err
+	}
+	tb, err := parser.parseExpr()
+	if err != nil {
+		return nil, err
+	}
+	table := tb.(dialect.SqlIdentifier)
+	if err := parser.consume(SET); err != nil {
+		return nil, err
+	}
+	return &dialect.SqlUpdate{
+		Table: &table,
+	}, nil
+}
+
+func (parser *mysqlParser) parseSelect() (*dialect.SqlSelect, error) {
+	if err := parser.consume(SELECT); err != nil {
+		return nil, err
+	}
+	return &dialect.SqlSelect{}, nil
+}
+
+func (parser *mysqlParser) parseExprList() (dialect.SqlExprList, error) {
+	return nil, nil
+}
+
+func (parser *mysqlParser) consume(kind dialect.TokenKind) error {
+	token := parser.stream.Curr()
+	if token != nil && token.Kind == kind {
+		parser.stream.Next()
+		return nil
+	}
+	return fmt.Errorf("expect: %d, but got: %v", kind, token)
 }
 
 func newMysqlParser(stream *dialect.TokenList) *mysqlParser {

@@ -26,11 +26,8 @@
 package mysql
 
 import (
-	"errors"
 	"fmt"
 	"kdb/dialect"
-
-	"golang.org/x/exp/slog"
 )
 
 type mysqlTokenizer struct {
@@ -42,23 +39,24 @@ type mysqlTokenizer struct {
 }
 
 func (tokenizer *mysqlTokenizer) tokenize() (*dialect.TokenList, error) {
-	list := dialect.TokenList{
-		Tokens: make([]*dialect.Token, 0),
-		Offset: 0,
-	}
+	tokens := make([]*dialect.Token, 0)
 	for {
 		token, err := tokenizer.next()
-		if err == nil {
-			if token == nil {
-				break
-			} else {
-				list.Add(token)
-			}
-		} else {
+		if err != nil {
 			return nil, err
 		}
+		if token == nil {
+			if tokenizer.length == tokenizer.offset {
+				tokens = append(tokens, dialect.NewToken("", dialect.EOF, -1, -1, -1, -1))
+				break
+			} else {
+				return nil, fmt.Errorf("unknown character:'%c'", tokenizer.sql[tokenizer.offset])
+			}
+		} else {
+			tokens = append(tokens, token)
+		}
 	}
-	return &list, nil
+	return dialect.NewTokenList(tokens), nil
 }
 
 func (tokenizer *mysqlTokenizer) next() (*dialect.Token, error) {
@@ -104,7 +102,6 @@ func (tokenizer *mysqlTokenizer) scanIdent() (*dialect.Token, error) {
 	curr := tokenizer.offset
 	for tokenizer.offset < tokenizer.length {
 		ch := tokenizer.sql[tokenizer.offset]
-		slog.Info(fmt.Sprintf("ident: %c", ch))
 		if isLetter(ch) {
 			tokenizer.offset++
 		} else {
@@ -115,33 +112,34 @@ func (tokenizer *mysqlTokenizer) scanIdent() (*dialect.Token, error) {
 		return nil, err
 	}
 	text := tokenizer.sql[curr:tokenizer.offset]
-	return &dialect.Token{
-		Text: text,
-		Type: dialect.Ident,
-
-		Position: dialect.Position{
-			Offset: curr,
-			Line:   0,
-			Column: 0,
-		},
-	}, nil
+	tt := dialect.Ident
+	var kd dialect.TokenKind = -1
+	if k, ok := isKeyword(text); ok {
+		tt = dialect.Symbol
+		kd = k
+	}
+	return dialect.NewToken(text, tt, kd, tokenizer.line, curr, tokenizer.offset), nil
 }
 
 func (tokenizer *mysqlTokenizer) scanNumber() (*dialect.Token, error) {
 	curr := tokenizer.offset
+	flag := false
 	for tokenizer.offset < tokenizer.length {
 		ch := tokenizer.sql[tokenizer.offset]
-		slog.Info(fmt.Sprintf("number: %c", ch))
 		if isNumber(ch) {
 			tokenizer.offset++
+		} else if !flag && ch == '.' {
+			tokenizer.offset++
+			flag = true
 		} else {
 			break
 		}
 	}
-	return &dialect.Token{
-		Text: tokenizer.sql[curr:tokenizer.offset],
-		Type: dialect.Float,
-	}, nil
+	tt := dialect.Integer
+	if flag {
+		tt = dialect.Float
+	}
+	return dialect.NewToken(tokenizer.sql[curr:tokenizer.offset], tt, -1, tokenizer.line, curr, tokenizer.offset), nil
 }
 
 func (tokenizer *mysqlTokenizer) scanString() (*dialect.Token, error) {
@@ -150,7 +148,6 @@ func (tokenizer *mysqlTokenizer) scanString() (*dialect.Token, error) {
 	flag := false
 	for tokenizer.offset < tokenizer.length {
 		ch := tokenizer.sql[tokenizer.offset]
-		slog.Info(fmt.Sprintf("string: %c", ch))
 		if ch == '\'' {
 			tokenizer.offset++
 			flag = true
@@ -160,20 +157,19 @@ func (tokenizer *mysqlTokenizer) scanString() (*dialect.Token, error) {
 		}
 	}
 	if !flag && tokenizer.offset == tokenizer.length {
-		return nil, errors.New("expect: ', but got none")
+		return nil, fmt.Errorf("expect: ', but got none")
 	}
-	return &dialect.Token{
-		Text: tokenizer.sql[curr:tokenizer.offset],
-		Type: dialect.String,
-	}, nil
+	return dialect.NewToken(tokenizer.sql[curr:tokenizer.offset-1], dialect.String, -1, tokenizer.line, curr, tokenizer.offset), nil
 }
 
 func (tokenizer *mysqlTokenizer) scanSymbol() (*dialect.Token, error) {
 	mark := tokenizer.offset
-	ch := tokenizer.sql[mark]
 	tokenizer.offset++
-	peek := tokenizer.offset
-	for i := mark; i < tokenizer.length; i++ {
+	for i := tokenizer.offset; i < tokenizer.length; i++ {
+		sym := tokenizer.sql[mark:i]
+		if kd, ok := isSymbol2(sym); ok {
+			return dialect.NewToken(sym, dialect.Symbol, kd, tokenizer.line, mark, tokenizer.offset), nil
+		}
 	}
 	return nil, nil
 }
@@ -184,7 +180,7 @@ func (tokenizer *mysqlTokenizer) consume(chars ...uint8) error {
 			tokenizer.offset++
 			return nil
 		} else {
-			return errors.New(fmt.Sprintf("expect: %c, actual: %c", ch, tokenizer.sql[tokenizer.offset]))
+			return fmt.Errorf("expect: %c, actual: %c", ch, tokenizer.sql[tokenizer.offset])
 		}
 	}
 	return nil
@@ -209,7 +205,8 @@ func isNumber(ch uint8) bool {
 
 func isSymbol(ch uint8) bool {
 	for i := op_start; i < op_end; i++ {
-		if str, ok := tokens[i]; ok && str[0] == ch {
+		str, ok := tokens[i]
+		if ok && str[0] == ch {
 			return true
 		}
 	}
