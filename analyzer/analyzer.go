@@ -49,7 +49,7 @@ func (a *analyzer) Visit(node dialect.SqlNode) bool {
 
 func (a *analyzer) VisitSelect(n *dialect.SqlSelect) bool {
 	//
-	for _, tb := range n.From.List() {
+	for _, tb := range n.From.List {
 		if a.Metadata.GetTable(tb.String()) == nil {
 			a.Error = fmt.Errorf("table not found")
 			return false
