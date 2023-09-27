@@ -228,7 +228,7 @@ func (parser *mysqlParser) parseSelect() (*dialect.SqlSelect, error) {
 	}
 
 	// group by
-	var groupBy dialect.SqlExprList
+	var groupBy *dialect.SqlExprList
 	if parser.stream.Peek().Kind == GROUP {
 		parser.consume(GROUP)
 		if err := parser.consume(BY); err != nil {
@@ -251,7 +251,7 @@ func (parser *mysqlParser) parseSelect() (*dialect.SqlSelect, error) {
 	}
 
 	// order by
-	var orderBy dialect.SqlExprList
+	var orderBy *dialect.SqlExprList
 	if parser.stream.Peek().Kind == ORDER {
 		parser.consume(ORDER)
 		if err := parser.consume(BY); err != nil {
@@ -294,7 +294,7 @@ func (parser *mysqlParser) parseSelect() (*dialect.SqlSelect, error) {
 	}, nil
 }
 
-func (parser *mysqlParser) parseExprList() (dialect.SqlExprList, error) {
+func (parser *mysqlParser) parseExprList() (*dialect.SqlExprList, error) {
 	// expr [',' expr]*
 	return nil, nil
 }

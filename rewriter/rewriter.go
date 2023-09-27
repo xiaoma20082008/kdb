@@ -50,7 +50,7 @@ func (r *rewriter) Visit(node dialect.SqlNode) bool {
 
 func (r *rewriter) visitSelect(sqlSelect *dialect.SqlSelect) bool {
 	// 这里我们以单表为例
-	tb := sqlSelect.From.List()[0].(dialect.SqlIdentifier)
+	tb := sqlSelect.From.List[0].(dialect.SqlIdentifier)
 
 	// table scan
 	scan := logicalplan.NewScan(tb.Id, r.mp)

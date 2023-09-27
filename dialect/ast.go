@@ -39,10 +39,10 @@ type SqlExpr interface {
 	SqlNode
 }
 
-type SqlExprList interface {
+type SqlExprList struct {
 	SqlExpr
 
-	List() []SqlExpr
+	List []SqlExpr
 }
 
 // SqlStmt
@@ -52,12 +52,12 @@ type (
 	SqlSelect struct {
 		SqlStmt
 
-		Columns SqlExprList
-		From    SqlExprList
+		Columns *SqlExprList
+		From    *SqlExprList
 		Where   SqlExpr
-		GroupBy SqlExprList
+		GroupBy *SqlExprList
 		Having  SqlExpr
-		OrderBy SqlExprList
+		OrderBy *SqlExprList
 		Limit   SqlExpr
 		Offset  SqlExpr
 	}
@@ -66,8 +66,8 @@ type (
 		SqlStmt
 
 		Table   *SqlIdentifier
-		Columns SqlExprList
-		Values  SqlExprList
+		Columns *SqlExprList
+		Values  *SqlExprList
 	}
 
 	SqlDelete struct {

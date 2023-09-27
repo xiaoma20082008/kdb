@@ -67,7 +67,7 @@ func Test_mysqlParser_parseStmt(t *testing.T) {
 			},
 			want: &dialect.SqlInsert{
 				Table: &dialect.SqlIdentifier{Id: "t1"},
-				Columns: []dialect.SqlExprList{
+				Columns: &dialect.SqlExprList{
 					List: []dialect.SqlExpr{
 						&dialect.SqlIdentifier{Id: "a"},
 						&dialect.SqlIdentifier{Id: "b"},
@@ -75,11 +75,13 @@ func Test_mysqlParser_parseStmt(t *testing.T) {
 						&dialect.SqlIdentifier{Id: "d"},
 					},
 				},
-				Values: []dialect.SqlExpr{
-					&dialect.SqlString{Value: "a"},
-					&dialect.SqlFloat{Value: 100.00},
-					&dialect.SqlInteger{Value: 200},
-					&dialect.SqlIdentifier{Id: "?"},
+				Values: &dialect.SqlExprList{
+					List: []dialect.SqlExpr{
+						&dialect.SqlString{Value: "a"},
+						&dialect.SqlFloat{Value: 100.00},
+						&dialect.SqlInteger{Value: 200},
+						&dialect.SqlIdentifier{Id: "?"},
+					},
 				},
 			},
 			wantErr: false,
