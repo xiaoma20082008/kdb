@@ -7,7 +7,6 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/spf13/cobra v1.7.0
-	golang.org/x/exp v0.0.0-20230206171751-46f607a40771
 	gopkg.in/yaml.v3 v3.0.1
 )
 
