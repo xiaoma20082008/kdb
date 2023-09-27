@@ -25,5 +25,10 @@
 
 package executor
 
+import "kdb/storage"
+
 type ExecutionContext struct {
+	// session id
+	Sid      uint64
+	Provider storage.MetadataProvider
 }

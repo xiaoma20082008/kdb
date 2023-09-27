@@ -1,14 +1,14 @@
 //
-// File: datasource.go
-// Project: datasource
-// File Created: 2023-09-07
+// File: storage.go
+// Project: storage
+// File Created: 2023-09-25
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 // -----
 // Last Modified By:  xiaoma20082008 (mmccxx2519@gmail.com)
-// Last Modified Time: 2023-09-07 19:37:19
+// Last Modified Time: 2023-09-25 19:57:47
 // -----
 //
-// Copyright (C) xiaoma20082008. All rights reserved.
+// Copyright (C) 2023, xiaoma20082008. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,11 +23,8 @@
 // limitations under the License.
 //
 
-package datasource
-
-import "kdb/datatype"
+package storage
 
 type DataSource interface {
-	GetTable() *datatype.Table
-	Scan()
+	Table() Table
 }

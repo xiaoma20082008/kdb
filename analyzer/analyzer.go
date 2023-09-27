@@ -25,9 +25,46 @@
 
 package analyzer
 
-import "kdb/dialect"
+import (
+	"fmt"
+	"kdb/dialect"
+	"kdb/storage"
+)
+
+type analyzer struct {
+	dialect.Visitor
+
+	Metadata storage.MetadataProvider
+	Analysis Analysis
+	Error    error
+}
+
+func (a *analyzer) Visit(node dialect.SqlNode) bool {
+	switch n := node.(type) {
+	case *dialect.SqlSelect:
+		return a.VisitSelect(n)
+	}
+	return false
+}
+
+func (a *analyzer) VisitSelect(n *dialect.SqlSelect) bool {
+	//
+	for _, tb := range n.From.List() {
+		if a.Metadata.GetTable(tb.String()) == nil {
+			a.Error = fmt.Errorf("table not found")
+			return false
+		}
+	}
+	return true
+}
 
 func Analyze(ast dialect.SqlStmt) (*Analysis, error) {
-
-	return nil, nil
+	analyzer := analyzer{}
+	analyzer.Visit(ast)
+	if analyzer.Error != nil {
+		return nil, analyzer.Error
+	}
+	return &Analysis{
+		Ast: ast,
+	}, nil
 }

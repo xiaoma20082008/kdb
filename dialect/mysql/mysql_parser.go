@@ -57,6 +57,7 @@ func (parser *mysqlParser) parseStmt() (dialect.SqlStmt, error) {
 }
 
 func (parser *mysqlParser) parseExpr() (dialect.SqlExpr, error) {
+	// https://dev.mysql.com/doc/refman/8.0/en/expressions.html#expression-syntax
 	token := parser.stream.Curr()
 	if token == nil {
 		return nil, nil
@@ -190,13 +191,111 @@ func (parser *mysqlParser) parseUpdate() (*dialect.SqlUpdate, error) {
 }
 
 func (parser *mysqlParser) parseSelect() (*dialect.SqlSelect, error) {
+	// select <select_expr>
+	// from <table_ref>
+	// where <condition>
+	// group by <expr>
+	// having <condition>
+	// order by <order_expr>
+	// limit <offset>, <limit>
+
+	// select
 	if err := parser.consume(SELECT); err != nil {
 		return nil, err
 	}
-	return &dialect.SqlSelect{}, nil
+	columns, err := parser.parseExprList()
+	if err != nil {
+		return nil, err
+	}
+
+	// from
+	if err := parser.consume(FROM); err != nil {
+		return nil, err
+	}
+	from, err := parser.parseExprList()
+	if err != nil {
+		return nil, err
+	}
+
+	// where
+	var where dialect.SqlExpr
+	if parser.stream.Peek().Kind == WHERE {
+		parser.consume(WHERE)
+		where, err = parser.parseExpr()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// group by
+	var groupBy dialect.SqlExprList
+	if parser.stream.Peek().Kind == GROUP {
+		parser.consume(GROUP)
+		if err := parser.consume(BY); err != nil {
+			return nil, err
+		}
+		groupBy, err = parser.parseExprList()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// having
+	var having dialect.SqlExpr
+	if parser.stream.Peek().Kind == HAVING {
+		parser.consume(HAVING)
+		having, err = parser.parseExpr()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// order by
+	var orderBy dialect.SqlExprList
+	if parser.stream.Peek().Kind == ORDER {
+		parser.consume(ORDER)
+		if err := parser.consume(BY); err != nil {
+			return nil, err
+		}
+		orderBy, err = parser.parseExprList()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// limit xx,xx
+	var limit, offset dialect.SqlExpr
+	if parser.stream.Peek().Kind == LIMIT {
+		parser.consume(LIMIT)
+		p, err := parser.parseExpr()
+		if err != nil {
+			return nil, err
+		}
+		if parser.stream.Peek().Kind == COMMA {
+			parser.consume(COMMA)
+			limit, err = parser.parseExpr()
+			if err != nil {
+				return nil, err
+			}
+			offset = p
+		} else {
+			limit = p
+		}
+	}
+	return &dialect.SqlSelect{
+		Columns: columns,
+		From:    from,
+		Where:   where,
+		GroupBy: groupBy,
+		Having:  having,
+		OrderBy: orderBy,
+		Limit:   limit,
+		Offset:  offset,
+	}, nil
 }
 
 func (parser *mysqlParser) parseExprList() (dialect.SqlExprList, error) {
+	// expr [',' expr]*
 	return nil, nil
 }
 

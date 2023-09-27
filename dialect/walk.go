@@ -25,14 +25,12 @@
 
 package dialect
 
-import "log/slog"
-
 type Visitor interface {
 	Visit(node SqlNode) bool
 }
 
 func Walk(v Visitor, node SqlNode) {
-	if !v.Visit(node) {
+	if node == nil || !v.Visit(node) {
 		return
 	}
 	switch n := node.(type) {
@@ -42,6 +40,13 @@ func Walk(v Visitor, node SqlNode) {
 	case *SqlDelete:
 	case *SqlUpdate:
 	case *SqlSelect:
-		slog.Info("%v", n)
+		v.Visit(n.Columns)
+		v.Visit(n.From)
+		v.Visit(n.Where)
+		v.Visit(n.GroupBy)
+		v.Visit(n.Having)
+		v.Visit(n.OrderBy)
+		v.Visit(n.Limit)
+		v.Visit(n.Offset)
 	}
 }

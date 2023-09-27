@@ -30,3 +30,10 @@ import "fmt"
 type LogicalExpr interface {
 	fmt.Stringer
 }
+
+type LogicalExprList interface {
+	LogicalExpr
+}
+type AggregateExpr interface {
+	LogicalExpr
+}

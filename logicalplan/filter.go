@@ -27,8 +27,7 @@ package logicalplan
 
 import (
 	"fmt"
-
-	"kdb/datatype"
+	"kdb/storage"
 )
 
 type Filter struct {
@@ -38,12 +37,12 @@ type Filter struct {
 	expr  LogicalExpr
 }
 
-func (f *Filter) GetTable() *datatype.Table {
+func (f *Filter) GetTable() storage.Table {
 	return f.input.GetTable()
 }
 
 func (f *Filter) GetChildren() []LogicalPlan {
-	return f.input.GetChildren()
+	return []LogicalPlan{f.input}
 }
 
 func (f *Filter) String() string {

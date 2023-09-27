@@ -1,14 +1,14 @@
 //
-// File: estimator.go
-// Project: optimizer
-// File Created: 2023-09-13
+// File: scan.go
+// Project: physicalplan
+// File Created: 2023-09-25
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 // -----
 // Last Modified By:  xiaoma20082008 (mmccxx2519@gmail.com)
-// Last Modified Time: 2023-09-13 18:15:44
+// Last Modified Time: 2023-09-25 15:45:50
 // -----
 //
-// Copyright (C) xiaoma20082008. All rights reserved.
+// Copyright (C) 2023, xiaoma20082008. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,22 +23,34 @@
 // limitations under the License.
 //
 
-package optimizer
+package physicalplan
 
 import (
-	"kdb/logicalplan"
+	"fmt"
+	"kdb/storage"
 )
 
-type Estimator interface {
-	Estimate(plan logicalplan.LogicalPlan) *Cost
+type ScanExec struct {
+	PhysicalPlan
+
+	dataSource storage.DataSource
+	projection []string
 }
 
-type estimator struct{}
+func (scan *ScanExec) String() string {
+	return fmt.Sprintf("Scan: schema=%v,projection=%v", "", scan.projection)
+}
 
-func (e *estimator) Estimate(plan logicalplan.LogicalPlan) *Cost {
+func (scan *ScanExec) Close() error {
 	return nil
 }
 
-func Estimate(plan logicalplan.LogicalPlan) *Cost {
-	return &Cost{}
+func (scan *ScanExec) Open() error { return nil }
+
+func (scan *ScanExec) Next() any {
+	return nil
+}
+
+func (scan *ScanExec) Children() []PhysicalPlan {
+	return make([]PhysicalPlan, 0)
 }

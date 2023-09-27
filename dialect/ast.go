@@ -29,10 +29,6 @@ import "fmt"
 
 type SqlNode interface {
 	fmt.Stringer
-
-	Line() int
-	Offset() int
-	Column() int
 }
 
 type SqlStmt interface {
@@ -43,7 +39,11 @@ type SqlExpr interface {
 	SqlNode
 }
 
-type SqlExprList []SqlExpr
+type SqlExprList interface {
+	SqlExpr
+
+	List() []SqlExpr
+}
 
 // SqlStmt
 type (
@@ -59,6 +59,7 @@ type (
 		Having  SqlExpr
 		OrderBy SqlExprList
 		Limit   SqlExpr
+		Offset  SqlExpr
 	}
 
 	SqlInsert struct {

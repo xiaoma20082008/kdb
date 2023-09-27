@@ -1,14 +1,14 @@
 //
-// File: datatype.go
-// Project: datatype
-// File Created: 2023-09-07
+// File: planner.go
+// Project: planner
+// File Created: 2023-09-25
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 // -----
 // Last Modified By:  xiaoma20082008 (mmccxx2519@gmail.com)
-// Last Modified Time: 2023-09-07 18:34:18
+// Last Modified Time: 2023-09-25 15:14:42
 // -----
 //
-// Copyright (C) xiaoma20082008. All rights reserved.
+// Copyright (C) 2023, xiaoma20082008. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,11 +23,4 @@
 // limitations under the License.
 //
 
-package datatype
-
-import "github.com/apache/arrow/go/v14/arrow"
-
-var (
-	BoolType = arrow.BooleanType{}
-	Int8Type = arrow.Int8Type{}
-)
+package planner

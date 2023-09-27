@@ -1,14 +1,14 @@
 //
-// File: metadata.go
-// Project: datatype
-// File Created: 2023-09-07
+// File: projection.go
+// Project: logicalplan
+// File Created: 2023-09-26
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 // -----
 // Last Modified By:  xiaoma20082008 (mmccxx2519@gmail.com)
-// Last Modified Time: 2023-09-07 19:39:05
+// Last Modified Time: 2023-09-26 17:54:45
 // -----
 //
-// Copyright (C) xiaoma20082008. All rights reserved.
+// Copyright (C) 2023, xiaoma20082008. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,4 +23,28 @@
 // limitations under the License.
 //
 
-package datatype
+package logicalplan
+
+import (
+	"fmt"
+	"kdb/storage"
+)
+
+type Project struct {
+	LogicalPlan
+
+	input    LogicalPlan
+	projects LogicalExprList
+}
+
+func (p *Project) GetTable() storage.Table {
+	return p.input.GetTable()
+}
+
+func (p *Project) GetChildren() []LogicalPlan {
+	return []LogicalPlan{p.input}
+}
+
+func (p *Project) String() string {
+	return fmt.Sprintf("Projection: %s", p.projects.String())
+}

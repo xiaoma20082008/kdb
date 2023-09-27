@@ -27,14 +27,13 @@ package logicalplan
 
 import (
 	"fmt"
-
-	"kdb/datatype"
+	"kdb/storage"
 )
 
 type LogicalPlan interface {
 	fmt.Stringer
 
-	GetTable() *datatype.Table
+	GetTable() storage.Table
 	GetChildren() []LogicalPlan
 }
 

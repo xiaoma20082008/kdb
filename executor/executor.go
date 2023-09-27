@@ -30,6 +30,8 @@ import (
 
 	"kdb/analyzer"
 	"kdb/dialect"
+
+	// TODO: 实现一种spi机制，可以动态加载相关实现
 	_ "kdb/dialect/mysql"
 	"kdb/optimizer"
 	"kdb/planner"
@@ -67,8 +69,7 @@ func Execute(sql string, args map[int32]any) error {
 	if err := physicalPlan.Open(); err != nil {
 		return err
 	}
-	for physicalPlan.HasNext() {
-		data := physicalPlan.Next()
+	for data := physicalPlan.Next(); data != nil; {
 		fmt.Println(data)
 	}
 	return physicalPlan.Close()

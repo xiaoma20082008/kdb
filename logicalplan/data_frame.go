@@ -28,14 +28,32 @@ package logicalplan
 type DataFrame interface {
 	Project(projections []LogicalExpr) DataFrame
 	Filter(filter LogicalExpr) DataFrame
-	Aggregate(groupBy []LogicalExpr) DataFrame
-	Join() DataFrame
-	Scan() DataFrame
-	Sort() DataFrame
-	Limit() DataFrame
+	Aggregate(groupBy []LogicalExpr, aggr []AggregateExpr) DataFrame
 	Plan() LogicalPlan
 }
 
 type dataFrame struct {
 	DataFrame
+
+	plan LogicalPlan
+}
+
+func (f *dataFrame) Project(projections []LogicalExpr) DataFrame {
+	return nil
+}
+
+func (f *dataFrame) Filter(filter LogicalExpr) DataFrame {
+	return nil
+}
+
+func (f *dataFrame) Aggregate(groupBy []LogicalExpr, aggr []AggregateExpr) DataFrame {
+	return nil
+}
+
+func (f *dataFrame) Plan() LogicalPlan {
+	return f.plan
+}
+
+func NewDataFrame(plan LogicalPlan) DataFrame {
+	return &dataFrame{plan: plan}
 }

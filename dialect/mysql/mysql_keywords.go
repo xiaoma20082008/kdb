@@ -794,6 +794,7 @@ const (
 
 	QM    // ?
 	COLON // :
+	COMMA // ,
 	EM    // !
 	STAR  // *
 	PLUS  // +
@@ -805,7 +806,7 @@ const (
 	GT    // >
 	GE    // >=
 	RS    // >>
-	NE    // !=, <>
+	NE    // != <>
 	EQ    // =
 	NSE   // <=>
 	LP    // (
@@ -1598,6 +1599,7 @@ var tokens = map[dialect.TokenKind]string{
 	ZONE:     "ZONE",
 
 	QM:    "?",
+	COMMA: ",",
 	LT:    "<",
 	LS:    "<<",
 	LE:    "<=",

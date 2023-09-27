@@ -25,8 +25,7 @@ package logicalplan
 
 import (
 	"fmt"
-
-	"kdb/datatype"
+	"kdb/storage"
 )
 
 type Limit struct {
@@ -36,7 +35,7 @@ type Limit struct {
 	limit uint32
 }
 
-func (l *Limit) GetTable() *datatype.Table {
+func (l *Limit) GetTable() storage.Table {
 	return l.input.GetTable()
 }
 

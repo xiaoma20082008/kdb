@@ -25,12 +25,9 @@
 
 package emitter
 
-import "go/ast"
-
 type Emitter interface {
 	Emit()
 }
 
 func Emit() {
-	_ = ast.ArrayType{}
 }

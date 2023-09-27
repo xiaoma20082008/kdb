@@ -1,14 +1,14 @@
 //
 // File: cost.go
 // Project: optimizer
-// File Created: 2023-09-06
+// File Created: 2023-09-26
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 // -----
 // Last Modified By:  xiaoma20082008 (mmccxx2519@gmail.com)
-// Last Modified Time: 2023-09-06 18:34:28
+// Last Modified Time: 2023-09-27 11:08:07
 // -----
 //
-// Copyright (C) xiaoma20082008. All rights reserved.
+// Copyright (C) 2023, xiaoma20082008. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

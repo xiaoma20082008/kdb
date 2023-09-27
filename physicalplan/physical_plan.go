@@ -35,6 +35,22 @@ type PhysicalPlan interface {
 	io.Closer
 	Open() error
 	Next() any
-	HasNext() bool
 	Children() []PhysicalPlan
+}
+
+func format0(plan PhysicalPlan) string {
+	return format(plan, 0)
+}
+
+func format(plan PhysicalPlan, ident int) string {
+	out := ""
+	for i := 0; i < ident; i++ {
+		out += "\t"
+	}
+	out += plan.String()
+	out += "\n"
+	for _, child := range plan.Children() {
+		out += format(child, ident+1)
+	}
+	return out
 }

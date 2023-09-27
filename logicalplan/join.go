@@ -1,14 +1,14 @@
 //
-// File: estimator.go
-// Project: optimizer
-// File Created: 2023-09-13
+// File: join.go
+// Project: logicalplan
+// File Created: 2023-09-26
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 // -----
 // Last Modified By:  xiaoma20082008 (mmccxx2519@gmail.com)
-// Last Modified Time: 2023-09-13 18:15:44
+// Last Modified Time: 2023-09-26 17:57:10
 // -----
 //
-// Copyright (C) xiaoma20082008. All rights reserved.
+// Copyright (C) 2023, xiaoma20082008. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,22 +23,41 @@
 // limitations under the License.
 //
 
-package optimizer
+package logicalplan
 
 import (
-	"kdb/logicalplan"
+	"fmt"
+	"kdb/storage"
 )
 
-type Estimator interface {
-	Estimate(plan logicalplan.LogicalPlan) *Cost
+type JoinType int32
+
+const (
+	LeftJoin JoinType = iota
+	RightJoin
+	InnerJoin
+	SelfJoin
+	CrossJoin
+)
+
+type Join struct {
+	// left JOIN right ON xx = xx USING xx
+	LogicalPlan
+
+	Left      LogicalPlan
+	Right     LogicalPlan
+	JoinType  JoinType
+	Condition LogicalExpr
 }
 
-type estimator struct{}
-
-func (e *estimator) Estimate(plan logicalplan.LogicalPlan) *Cost {
-	return nil
+func (j *Join) GetTable() storage.Table {
+	return storage.NewTable("", "")
 }
 
-func Estimate(plan logicalplan.LogicalPlan) *Cost {
-	return &Cost{}
+func (j *Join) GetChildren() []LogicalPlan {
+	return []LogicalPlan{j.Left, j.Right}
+}
+
+func (j *Join) String() string {
+	return fmt.Sprintf("Join: %s", "")
 }

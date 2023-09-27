@@ -1,20 +1,19 @@
 package logicalplan
 
 import (
-	"kdb/datasource"
-	"kdb/datatype"
+	"kdb/storage"
 )
 
 type Scan struct {
 	LogicalPlan
 
-	path string
-
-	dataSource datasource.DataSource
+	Table      storage.Table
+	Projection LogicalExprList
+	Condition  LogicalExpr
 }
 
-func (s *Scan) GetTable() *datatype.Table {
-	return s.dataSource.GetTable()
+func (s *Scan) GetTable() storage.Table {
+	return s.Table
 }
 
 func (s *Scan) GetChildren() []LogicalPlan {
@@ -22,12 +21,12 @@ func (s *Scan) GetChildren() []LogicalPlan {
 }
 
 func (s *Scan) String() string {
-	return "Scan: " + s.path
+	return "Scan: " + s.Table.Name() + ""
 }
 
-func NewScan(path string, dataSource datasource.DataSource) LogicalPlan {
-	f := new(Scan)
-	f.path = path
-	f.dataSource = dataSource
-	return f
+func NewScan(path string, mp storage.MetadataProvider) LogicalPlan {
+	tb := mp.GetTable(path)
+	return &Scan{
+		Table: tb,
+	}
 }
