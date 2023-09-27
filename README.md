@@ -26,4 +26,37 @@
 
 # kdb
 
+## Architecture
+
+
+```
+
+    SQL     +-----------+      Token       +-----------+       AST        +-----------+  AST(annotated)  +-----------+
+----------> |   Lexer   | ---------------> |   Parser  | ---------------> |  Analyzer | ---------------> |  Rewriter |
+            +-----------+                  +-----------+                  +-----------+                  +-----------+
+                                                                                                               |
+                                                                                                               | LogicalPlan
+                                                                                                               |
+                                                                                                               V
+            +-----------+     JIT Code     +-----------+   PhysicalPlan   +-----------+   LogicalPlan    +-----------+
+<---------- |  Executor | <--------------- | Generator | <--------------- |  Emitter  | <--------------- | Optimizer |
+   OUTPUT   +-----------+                  +-----------+                  +-----------+                  +-----------+
+               ^     |
+               |     |
+               |     V
+            +-----------+        +----------------+        +------------+        +-----------+
+            |  Storage  |        | System Catalog |        | Statistics |        |    ....   |
+            +-----------+        +----------------+        +------------+        +-----------+
+
+```
+
 ## Features
+
+- [ ] SQL Lexer
+- [ ] SQL Parser
+- [ ] SQL Analyzer
+- [ ] SQL Rewriter
+- [ ] Optimizer
+- [ ] Emitter
+- [ ] Generator
+- [ ] Executor
