@@ -1,11 +1,11 @@
 //
-// File: reader.go
-// Project: scanner
-// File Created: 2025-01-15
+// File: sql_expr.go
+// Project: stmt
+// File Created: 2025-01-05
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 //
 // ------------------------------------------------------------------------
-// Last Modified At: 2025-01-15 22:09:51
+// Last Modified At: 2025-01-05 18:17:50
 // Last Modified By: xiaoma20082008 (mmccxx2519@gmail.com>)
 // ------------------------------------------------------------------------
 //
@@ -24,48 +24,51 @@
 // limitations under the License.
 //
 
-package scanner
+package stmt
 
-type stringReader struct {
-	stream string
-	offset int
-	line   int
-	column int
-	limit  int
+import (
+	"context"
+	"fmt"
+)
+
+type SqlExpr interface {
+	fmt.Stringer
+	Accept(v SqlVisitor, ctx context.Context) interface{}
 }
 
-func newReader(text string) *stringReader {
-	sr := new(stringReader)
-	sr.stream = text
-	sr.offset = 0
-	sr.line = 1
-	sr.column = 1
-	sr.limit = len(text)
-	return sr
+type SqlVisitor interface {
+	Visit(SqlExpr) bool
 }
 
-func (r *stringReader) available() bool {
-	return r.offset < r.limit
+type SqlIdent struct {
+	SqlExpr
+	Name string
 }
 
-func (r *stringReader) advance() {
-	if r.available() {
-		r.offset++
-	}
+type SqlValue struct {
+	SqlExpr
+	Value string
 }
 
-func (r *stringReader) current() byte {
-	if r.available() {
-		return r.stream[r.offset]
-	} else {
-		return EOI
-	}
+type SqlBinaryExpr struct {
+	SqlExpr
+	Lhs SqlExpr
+	Rhs SqlExpr
 }
 
-func (r *stringReader) peek(n int) byte {
-	if r.offset+n < r.limit {
-		return r.stream[r.offset+n]
-	} else {
-		return EOI
-	}
+type SqlUnaryExpr struct {
+	SqlExpr
+	Rhs SqlExpr
+}
+
+type SqlLikeExpr struct {
+	SqlExpr
+	Ident SqlIdent
+	Regex SqlValue
+}
+
+type SqlBetweenExpr struct {
+	SqlExpr
+	Ident SqlIdent
+	Regex SqlValue
 }

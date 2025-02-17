@@ -27,9 +27,10 @@ package main
 
 import (
 	"log/slog"
-	"os"
 
 	"github.com/spf13/cobra"
+	config "github.com/xiaoma20082008/kdb/pkg/server/config/v1"
+	"github.com/xiaoma20082008/kdb/pkg/server/proxy"
 )
 
 var rootCmd = &cobra.Command{
@@ -42,12 +43,15 @@ var startCmd = &cobra.Command{
 	Short: "Start kdb server, usage: kdb start --conf ?",
 	Run: func(cmd *cobra.Command, args []string) {
 		file, _ := cmd.Flags().GetString("conf")
-		data, _ := os.ReadFile(file)
-		conf := string(data)
-		msg := "Kdb starting with config file: " + file
-		slog.Info(msg)
-		slog.Info(conf)
-		slog.Info("Kdb started.")
+		var cfg *config.KdbConfig
+		var err error
+		cfg, err = config.NewKdbConfig(file)
+		if err == nil {
+			err = proxy.Start(cfg)
+		}
+		if err != nil {
+			slog.Error("", err)
+		}
 	},
 }
 
@@ -56,6 +60,7 @@ var stopCmd = &cobra.Command{
 	Short: "Stop kdb server, usage: kdb stop",
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Info("Kdb stopping...")
+		proxy.Close()
 		slog.Info("Kdb stopped.")
 	},
 }

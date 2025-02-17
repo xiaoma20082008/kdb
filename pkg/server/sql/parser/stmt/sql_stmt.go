@@ -1,11 +1,11 @@
 //
-// File: stmt.go
+// File: sql_stmt.go
 // Project: stmt
-// File Created: 2025-01-03
+// File Created: 2025-01-05
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 //
 // ------------------------------------------------------------------------
-// Last Modified At: 2025-01-03 22:11:57
+// Last Modified At: 2025-01-05 18:19:23
 // Last Modified By: xiaoma20082008 (mmccxx2519@gmail.com>)
 // ------------------------------------------------------------------------
 //
@@ -25,3 +25,67 @@
 //
 
 package stmt
+
+type SqlStmt interface {
+	SqlExpr
+}
+
+// dml
+
+type SqlInsert interface {
+	SqlStmt
+}
+
+type SqlDelete interface {
+	SqlStmt
+}
+
+type SqlUpdate interface {
+	SqlStmt
+}
+
+type SqlUpsert interface {
+	SqlStmt
+}
+
+// dql
+
+type SqlSelect interface {
+	SqlStmt
+}
+
+// ddl
+
+type SqlCreateDatabase interface {
+	SqlStmt
+}
+
+type SqlCreateTable interface {
+	SqlStmt
+}
+
+type SqlCreateIndex interface {
+	SqlStmt
+}
+
+type SqlAlterTable interface {
+	SqlStmt
+}
+
+type SqlDropTable interface {
+	SqlStmt
+}
+
+type SqlDropDatabase interface {
+	SqlStmt
+}
+
+// dcl
+
+type SqlGrantStmt interface {
+	SqlStmt
+}
+
+type SqlRevokeStmt interface {
+	SqlStmt
+}

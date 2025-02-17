@@ -1,11 +1,11 @@
 //
-// File: reader.go
-// Project: scanner
-// File Created: 2025-01-15
+// File: kdb_server_init.go
+// Project: proxy
+// File Created: 2025-01-21
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 //
 // ------------------------------------------------------------------------
-// Last Modified At: 2025-01-15 22:09:51
+// Last Modified At: 2025-01-21 00:28:37
 // Last Modified By: xiaoma20082008 (mmccxx2519@gmail.com>)
 // ------------------------------------------------------------------------
 //
@@ -24,48 +24,45 @@
 // limitations under the License.
 //
 
-package scanner
+package proxy
 
-type stringReader struct {
-	stream string
-	offset int
-	line   int
-	column int
-	limit  int
-}
+import (
+	"log/slog"
 
-func newReader(text string) *stringReader {
-	sr := new(stringReader)
-	sr.stream = text
-	sr.offset = 0
-	sr.line = 1
-	sr.column = 1
-	sr.limit = len(text)
-	return sr
-}
+	config "github.com/xiaoma20082008/kdb/pkg/server/config/v1"
+)
 
-func (r *stringReader) available() bool {
-	return r.offset < r.limit
-}
+var srv *KdbServer
 
-func (r *stringReader) advance() {
-	if r.available() {
-		r.offset++
+func Start(cfg *config.KdbConfig) error {
+	srv = NewKdbServer(cfg)
+	if err := srv.InitStorage(); err != nil {
+		return err
 	}
-}
-
-func (r *stringReader) current() byte {
-	if r.available() {
-		return r.stream[r.offset]
-	} else {
-		return EOI
+	if err := srv.InitProxy(); err != nil {
+		return err
 	}
+	srv.InitSignals()
+	if err := srv.InitMonitors(); err != nil {
+		return err
+	}
+	if err := srv.LoadPlugins(); err != nil {
+		return err
+	}
+	if err := srv.InitPlugins(); err != nil {
+		return err
+	}
+	serveChan := make(chan error)
+	go func() {
+		serveChan <- srv.Start()
+	}()
+	err := <-serveChan
+	return err
 }
 
-func (r *stringReader) peek(n int) byte {
-	if r.offset+n < r.limit {
-		return r.stream[r.offset+n]
-	} else {
-		return EOI
+func Close() {
+	if srv != nil {
+		err := srv.Close()
+		slog.Error("", err)
 	}
 }

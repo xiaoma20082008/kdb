@@ -25,3 +25,14 @@
 //
 
 package parser
+
+import (
+	"github.com/xiaoma20082008/kdb/pkg/server/sql/parser/stmt"
+	"github.com/xiaoma20082008/kdb/pkg/server/sql/scanner"
+)
+
+func Parse(sql string) (stmt.SqlStmt, error) {
+	s := scanner.New(sql)
+	s.Next()
+	return nil, nil
+}

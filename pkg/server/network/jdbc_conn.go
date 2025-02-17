@@ -1,11 +1,11 @@
 //
-// File: reader.go
-// Project: scanner
-// File Created: 2025-01-15
+// File: jdbc_conn.go
+// Project: network
+// File Created: 2025-01-22
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 //
 // ------------------------------------------------------------------------
-// Last Modified At: 2025-01-15 22:09:51
+// Last Modified At: 2025-01-22 21:33:51
 // Last Modified By: xiaoma20082008 (mmccxx2519@gmail.com>)
 // ------------------------------------------------------------------------
 //
@@ -24,48 +24,33 @@
 // limitations under the License.
 //
 
-package scanner
+package network
 
-type stringReader struct {
-	stream string
-	offset int
-	line   int
-	column int
-	limit  int
+import (
+	"net"
+
+	_ "github.com/xiaoma20082008/kdb/pkg/server/network/jdbc/mssql"
+	_ "github.com/xiaoma20082008/kdb/pkg/server/network/jdbc/mysql"
+	_ "github.com/xiaoma20082008/kdb/pkg/server/network/jdbc/oracle"
+)
+
+type jdbcConnection struct {
+	Connection
+	id  string
+	raw net.Conn
 }
 
-func newReader(text string) *stringReader {
-	sr := new(stringReader)
-	sr.stream = text
-	sr.offset = 0
-	sr.line = 1
-	sr.column = 1
-	sr.limit = len(text)
-	return sr
-}
+func (jdbc *jdbcConnection) Id() string { return jdbc.id }
 
-func (r *stringReader) available() bool {
-	return r.offset < r.limit
-}
+func (jdbc *jdbcConnection) Handshake() error { return nil }
 
-func (r *stringReader) advance() {
-	if r.available() {
-		r.offset++
-	}
-}
+func (jdbc *jdbcConnection) serve() error {
+	defer func() {
+		if err := recover(); err != nil {
+			jdbc.raw.Close()
+		}
+	}()
+	jdbc.Handshake()
 
-func (r *stringReader) current() byte {
-	if r.available() {
-		return r.stream[r.offset]
-	} else {
-		return EOI
-	}
-}
-
-func (r *stringReader) peek(n int) byte {
-	if r.offset+n < r.limit {
-		return r.stream[r.offset+n]
-	} else {
-		return EOI
-	}
+	return nil
 }

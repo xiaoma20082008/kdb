@@ -1,11 +1,11 @@
 //
-// File: reader.go
-// Project: scanner
-// File Created: 2025-01-15
+// File: tokens.go
+// Project: tokens
+// File Created: 2025-01-05
 // Author: xiaoma20082008 (mmccxx2519@gmail.com)
 //
 // ------------------------------------------------------------------------
-// Last Modified At: 2025-01-15 22:09:51
+// Last Modified At: 2025-01-07 23:42:09
 // Last Modified By: xiaoma20082008 (mmccxx2519@gmail.com>)
 // ------------------------------------------------------------------------
 //
@@ -24,48 +24,29 @@
 // limitations under the License.
 //
 
-package scanner
+package tokens
 
-type stringReader struct {
-	stream string
-	offset int
-	line   int
-	column int
-	limit  int
+import "fmt"
+
+type TokenKind int
+
+type Token struct {
+	fmt.Stringer
+	kind     TokenKind
+	text     string
+	location *Location
 }
 
-func newReader(text string) *stringReader {
-	sr := new(stringReader)
-	sr.stream = text
-	sr.offset = 0
-	sr.line = 1
-	sr.column = 1
-	sr.limit = len(text)
-	return sr
+type TokenList []*Token
+
+func (token *Token) String() string {
+	return fmt.Sprintf("Kind=%d,Text=%s(%d,%d)", token.kind, token.text, token.location.line, token.location.column)
 }
 
-func (r *stringReader) available() bool {
-	return r.offset < r.limit
-}
-
-func (r *stringReader) advance() {
-	if r.available() {
-		r.offset++
-	}
-}
-
-func (r *stringReader) current() byte {
-	if r.available() {
-		return r.stream[r.offset]
-	} else {
-		return EOI
-	}
-}
-
-func (r *stringReader) peek(n int) byte {
-	if r.offset+n < r.limit {
-		return r.stream[r.offset+n]
-	} else {
-		return EOI
-	}
+func New(kind int, text string, ln, col uint32) *Token {
+	tk := new(Token)
+	tk.kind = TokenKind(kind)
+	tk.text = text
+	tk.location = Position(ln, col)
+	return tk
 }
